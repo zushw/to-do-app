@@ -20,6 +20,7 @@ services:
     depends_on:
       - db
     environment:
+      - DB_ENGINE=postgres
       - DB_NAME=todo_db
       - DB_USER=todo_user
       - DB_PASSWORD=todo_password
