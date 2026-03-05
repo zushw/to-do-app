@@ -20,3 +20,16 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        
+        if instance.is_completed and not instance.external_quote:
+            try:
+                response = requests.get("https://zenquotes.io/api/random", timeout=5)
+                if response.status_code == 200:
+                    data = response.json()
+                    instance.external_quote = f"{data[0]['q']} - {data[0]['a']}"
+                    instance.save()
+            except requests.RequestException:
+                pass
