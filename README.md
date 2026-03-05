@@ -61,3 +61,4 @@ The project is a web-based task management system (To-Do List) designed to allow
         - ```category``` (Foreign Key -> ```Category```, optional)
         - ```owner``` (Foreign Key -> ```User```): The creator of the task.
         - ```shared_with``` (ManyToMany -> ```User```): Allows multiple users to view/interact with the task.
+        - ```external_quote``` (Text, optional): Stores the data fetched from the external API (e.g., a motivational quote saved when the task is completed).
