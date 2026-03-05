@@ -4,6 +4,7 @@ from .views import RegisterView, CategoryViewSet, TaskViewSet
 
 router = DefaultRouter()
 
+router.register(r'categories', CategoryViewSet, basename='category')
 router.register(r'tasks', TaskViewSet, basename='task')
 
 urlpatterns = [
