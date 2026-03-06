@@ -6,6 +6,6 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = [
             'id', 'title', 'description', 'is_completed', 'created_at', 
-            'category', 'owner', 'shared_with'
+            'category', 'owner', 'shared_with', 'external_quote'
         ]
-        read_only_fields = ['owner', 'created_at']
+        read_only_fields = ['owner', 'external_quote', 'created_at',]

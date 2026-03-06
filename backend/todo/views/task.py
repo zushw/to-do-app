@@ -5,7 +5,7 @@ from django.db.models import Q
 import requests
 
 from ..models import Task
-from ..serializers import TaskSerializer
+from ..serializers.task import TaskSerializer
 
 class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
