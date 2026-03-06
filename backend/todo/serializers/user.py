@@ -17,11 +17,22 @@ def validate_strong_password(password):
     return password
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password']
         extra_kwargs = {'password': {'write_only': True}}
         
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email is already in use.")
+        return value
+
+    def validate_username(self, value):
+        if len(value) < 3:
+            raise serializers.ValidationError("The username must be at least 6 characters long.")
+        return value
+    
     def validate_password(self, value):
         return validate_strong_password(value)
     
