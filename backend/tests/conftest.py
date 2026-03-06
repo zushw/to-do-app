@@ -8,8 +8,8 @@ def api_client():
 
 @pytest.fixture
 def user1():
-    return User.objects.create_user(username="user1", password="Strong@Password123")
+    return User.objects.create_user(username="username1", email="email@teste.com", password="Strong@Password123")
 
 @pytest.fixture
 def user2():
-    return User.objects.create_user(username="user2", password="Strong@Password123")
+    return User.objects.create_user(username="username2", password="Strong@Password123")

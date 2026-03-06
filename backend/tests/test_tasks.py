@@ -48,7 +48,7 @@ class TestTasksCRUD:
         task = Task.objects.create(title="Secret Project", owner=user1)
         
         url = reverse('task-share', args=[task.id])
-        response = api_client.post(url, {"username": "user2"})
+        response = api_client.post(url, {"username": "username2"})
         
         assert response.status_code == status.HTTP_200_OK
         task.refresh_from_db()

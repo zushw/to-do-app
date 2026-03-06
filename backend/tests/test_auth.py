@@ -30,7 +30,7 @@ class TestAuthentication:
 
     def test_login_returns_jwt_token(self, api_client, user1):
         url = reverse('token_obtain_pair')
-        data = {"username": "user1", "password": "Strong@Password123"}
+        data = {"username": "username1", "password": "Strong@Password123"}
         response = api_client.post(url, data)
         
         assert response.status_code == status.HTTP_200_OK
@@ -38,7 +38,7 @@ class TestAuthentication:
         
     def test_login_wrong_data(self, api_client, user1):
         url = reverse('token_obtain_pair')
-        data = {"username": "user1", "password": "wrongpass"}
+        data = {"username": "username1", "password": "wrongpass"}
         response = api_client.post(url, data)
         
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
