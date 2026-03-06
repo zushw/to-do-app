@@ -34,10 +34,15 @@ class UserSerializer(serializers.ModelSerializer):
         return user
     
 class UserUpdateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True, 
+        required=False, 
+        style={'input_type': 'password'}
+    )
+    
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password']
-        extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
     def validate_password(self, value):
         return validate_strong_password(value)

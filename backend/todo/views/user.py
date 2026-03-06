@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from ..serializers.user import UserPublicSerializer, UserUpdateSerializer
+from drf_spectacular.utils import extend_schema
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
@@ -14,6 +15,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         return User.objects.all().order_by('username')
     
+    @extend_schema(request=UserUpdateSerializer, responses=UserPublicSerializer)
     @action(detail=False, methods=['get', 'patch', 'put'])
     def me(self, request):
         user = request.user 
