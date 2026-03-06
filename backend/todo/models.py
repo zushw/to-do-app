@@ -5,6 +5,9 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categories')
 
+    class Meta:
+        ordering = ['-id']
+        
     def __str__(self):
         return self.name
 
@@ -17,6 +20,9 @@ class Task(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_tasks')
     shared_with = models.ManyToManyField(User, blank=True, related_name='shared_tasks')
     external_quote = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-id', '-created_at']
 
     def __str__(self):
         return self.title
