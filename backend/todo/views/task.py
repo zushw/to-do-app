@@ -1,7 +1,10 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
+from django.contrib.auth.models import User
 import requests
 
 from ..models import Task
@@ -33,3 +36,41 @@ class TaskViewSet(viewsets.ModelViewSet):
                     instance.save()
             except requests.RequestException:
                 pass
+            
+    @action(detail=True, methods=['post'])
+    def share(self, request, pk=None):
+        task = self.get_object()
+
+        if task.owner != request.user:
+            return Response(
+                {"detail": "Only the owner can share the task."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        username = request.data.get('username')
+        if not username:
+            return Response(
+                {"detail": "Please, fill the 'username' field."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user_to_share = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if user_to_share == request.user:
+            return Response(
+                {"detail": "You can't share a task with yourself."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        task.shared_with.add(user_to_share)
+        
+        return Response(
+            {"detail": f"Task shared successfully with {user_to_share.username}!"},
+            status=status.HTTP_200_OK
+        )
