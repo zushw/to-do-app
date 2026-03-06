@@ -1,6 +1,8 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import RegisterView, CategoryViewSet, TaskViewSet
+from .views.register import RegisterView
+from .views.category import CategoryViewSet
+from .views.task import TaskViewSet
 
 router = DefaultRouter()
 
