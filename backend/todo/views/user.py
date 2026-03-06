@@ -1,0 +1,30 @@
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.contrib.auth.models import User
+from rest_framework.permissions import IsAuthenticated
+from ..serializers.user import UserPublicSerializer, UserUpdateSerializer
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+
+    queryset = User.objects.all()
+    serializer_class = UserPublicSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return User.objects.all().order_by('username')
+    
+    @action(detail=False, methods=['get', 'patch', 'put'])
+    def me(self, request):
+        user = request.user 
+
+        if request.method == 'GET':
+            serializer = UserUpdateSerializer(user)
+            return Response(serializer.data)
+
+        elif request.method in ['PUT', 'PATCH']:
+            serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
