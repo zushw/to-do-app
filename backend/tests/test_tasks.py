@@ -64,6 +64,17 @@ class TestTasksCRUD:
         
         assert len(response.data['results']) == 1
         assert response.data['results'][0]['title'] == "User 1 Task"
+        
+    def test_unshare_task_success(self, api_client, user1, user2):
+        api_client.force_authenticate(user=user1)
+        task = Task.objects.create(title="Secret Project", owner=user1)
+        
+        url = reverse('task-unshare', args=[task.id])
+        response = api_client.post(url, {"username": "username2"})
+        
+        assert response.status_code == status.HTTP_200_OK
+        task.refresh_from_db()
+        assert user2 not in task.shared_with.all()
 
     @patch('todo.views.task.requests.get')
     def test_change_task_status_external_api(self, mock_get, api_client, user1):
