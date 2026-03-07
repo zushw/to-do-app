@@ -133,11 +133,12 @@ class TaskViewSet(viewsets.ModelViewSet):
             
         task.save()
         
+        serializer = TaskSerializer(task)
         return Response(
             {
                 "detail": "Task is_completed status changed successfully!",
-                "is_completed": task.is_completed,
-                "quote": task.external_quote
+                "task": serializer.data,
+
             },
             status=status.HTTP_200_OK
         )
