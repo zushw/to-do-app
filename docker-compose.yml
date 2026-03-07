@@ -26,6 +26,20 @@ services:
       - DB_PASSWORD=todo_password
       - DB_HOST=db
       - DB_PORT=5432
+  
+  frontend:
+    build:
+      context: ./frontend
+    container_name: todo_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    environment:
+      - BACK_API_URL=http://localhost:8000/api
 
 volumes:
   postgres_data:
