@@ -7,6 +7,9 @@ export function useDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState(null);
 
@@ -30,6 +33,23 @@ export function useDashboard() {
       setCategories(categoriesRes.data.results);
     } catch (error) {
       console.error("Failed to fetch data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function fetchFilteredTasks(search = searchQuery, categoryId = filterCategory) {
+    setIsLoading(true);
+    try {
+      const response = await api.get('/tasks/', {
+        params: {
+          search: search || undefined,
+          category: categoryId || undefined 
+        }
+      });
+      setTasks(response.data.results);
+    } catch (error) {
+      console.error("Failed to fetch filtered tasks:", error);
     } finally {
       setIsLoading(false);
     }
@@ -136,6 +156,7 @@ export function useDashboard() {
 
   return {
     tasks, pendingTasks, completedTasks, categories, isLoading, isProcessing,
+    searchQuery, setSearchQuery, filterCategory, setFilterCategory, fetchFilteredTasks,
     isTaskModalOpen, setIsTaskModalOpen, taskToEdit, setTaskToEdit,
     isDeleteModalOpen, setIsDeleteModalOpen, taskToDelete, setTaskToDelete,
     isCategoryModalOpen, setIsCategoryModalOpen,
