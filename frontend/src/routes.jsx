@@ -1,8 +1,20 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from './contexts/AuthContext';
 
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
+
+function PrivateRoute({ children }) {
+  const { signed, loading } = useContext(AuthContext);
+
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center text-gray-500">Loading...</div>;
+  }
+
+  return signed ? children : <Navigate to="/login" replace />;
+}
 
 export function AppRoutes() {
   return (
@@ -11,7 +23,14 @@ export function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          } 
+        />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
