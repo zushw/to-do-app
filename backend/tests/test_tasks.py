@@ -102,3 +102,40 @@ class TestTasksCRUD:
         
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert Task.objects.count() == 0
+        
+    def test_task_pagination(self, api_client, user1):
+        api_client.force_authenticate(user=user1)
+        
+        tasks = [Task(title=f"Task {i}", owner=user1) for i in range(15)]
+        Task.objects.bulk_create(tasks)
+        
+        url = reverse('task-list')
+        response = api_client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['count'] == 15
+        assert len(response.data['results']) == 10
+        assert response.data['next'] is not None 
+
+    def test_task_filtering(self, api_client, user1):
+        api_client.force_authenticate(user=user1)
+        
+        cat_work = Category.objects.create(name="Work", owner=user1)
+        cat_home = Category.objects.create(name="Home", owner=user1)
+        
+        Task.objects.create(title="Report", owner=user1, category=cat_work, is_completed=True)
+        Task.objects.create(title="Meeting", owner=user1, category=cat_work, is_completed=False)
+        Task.objects.create(title="Wash dishes", owner=user1, category=cat_home, is_completed=True)
+        
+        url = reverse('task-list')
+        
+        response_cat = api_client.get(f"{url}?category={cat_work.id}")
+        assert response_cat.status_code == status.HTTP_200_OK
+        assert len(response_cat.data['results']) == 2
+        
+        response_status = api_client.get(f"{url}?is_completed=true") 
+        assert len(response_status.data['results']) == 2
+        
+        response_combinado = api_client.get(f"{url}?category={cat_work.id}&is_completed=true")
+        assert len(response_combinado.data['results']) == 1
+        assert response_combinado.data['results'][0]['title'] == "Report"
