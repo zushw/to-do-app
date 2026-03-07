@@ -2,10 +2,19 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 
 export function useDashboard() {
-  const [tasks, setTasks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [pendingTasks, setPendingTasks] = useState([]);
+  const [pendingPage, setPendingPage] = useState(1);
+  const [pendingHasNext, setPendingHasNext] = useState(false);
+  const [pendingHasPrev, setPendingHasPrev] = useState(false);
+
+  const [completedTasks, setCompletedTasks] = useState([]);
+  const [completedPage, setCompletedPage] = useState(1);
+  const [completedHasNext, setCompletedHasNext] = useState(false);
+  const [completedHasPrev, setCompletedHasPrev] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
@@ -19,39 +28,88 @@ export function useDashboard() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    fetchInitialData();
   }, []);
 
-  async function fetchData() {
+  async function fetchInitialData() {
     setIsLoading(true);
     try {
-      const [tasksRes, categoriesRes] = await Promise.all([
-        api.get('/tasks/'),
+      const [pendingRes, completedRes, categoriesRes] = await Promise.all([
+        api.get('/tasks/', { params: { is_completed: 'false', page: 1 } }),
+        api.get('/tasks/', { params: { is_completed: 'true', page: 1 } }),
         api.get('/categories/')
       ]);
-      setTasks(tasksRes.data.results);
+
+      setPendingTasks(pendingRes.data.results);
+      setPendingHasNext(!!pendingRes.data.next);
+      setPendingHasPrev(!!pendingRes.data.previous);
+
+      setCompletedTasks(completedRes.data.results);
+      setCompletedHasNext(!!completedRes.data.next);
+      setCompletedHasPrev(!!completedRes.data.previous);
+
       setCategories(categoriesRes.data.results);
     } catch (error) {
-      console.error("Failed to fetch data:", error);
+      console.error("Failed to load initial data", error);
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function fetchFilteredTasks(search = searchQuery, categoryId = filterCategory) {
-    setIsLoading(true);
+  const fetchPending = async (page = pendingPage, search = searchQuery, cat = filterCategory) => {
     try {
-      const response = await api.get('/tasks/', {
-        params: {
-          search: search || undefined,
-          category: categoryId || undefined 
-        }
-      });
-      setTasks(response.data.results);
+      const res = await api.get('/tasks/', { params: { is_completed: 'false', page, search: search || undefined, category: cat || undefined } });
+      setPendingTasks(res.data.results);
+      setPendingHasNext(!!res.data.next);
+      setPendingHasPrev(!!res.data.previous);
+      setPendingPage(page);
+    } catch (error) { console.error(error); }
+  };
+
+  const fetchCompleted = async (page = completedPage, search = searchQuery, cat = filterCategory) => {
+    try {
+      const res = await api.get('/tasks/', { params: { is_completed: 'true', page, search: search || undefined, category: cat || undefined } });
+      setCompletedTasks(res.data.results);
+      setCompletedHasNext(!!res.data.next);
+      setCompletedHasPrev(!!res.data.previous);
+      setCompletedPage(page);
+    } catch (error) { console.error(error); }
+  };
+
+  const fetchFilteredTasks = async (search = searchQuery, category = filterCategory) => {
+    setIsLoading(true);
+    await Promise.all([ fetchPending(1, search, category), fetchCompleted(1, search, category) ]);
+    setIsLoading(false);
+  };
+
+  const nextPendingPage = () => { if(pendingHasNext) fetchPending(pendingPage + 1); };
+  const prevPendingPage = () => { if(pendingHasPrev) fetchPending(pendingPage - 1); };
+  const nextCompletedPage = () => { if(completedHasNext) fetchCompleted(completedPage + 1); };
+  const prevCompletedPage = () => { if(completedHasPrev) fetchCompleted(completedPage - 1); };
+
+  async function handleToggleComplete(task) {
+    const isNowCompleted = !task.is_completed;
+    const originalPending = [...pendingTasks];
+    const originalCompleted = [...completedTasks];
+
+    if (isNowCompleted) {
+      setPendingTasks(pendingTasks.filter(t => t.id !== task.id));
+      setCompletedTasks([{ ...task, is_completed: true }, ...completedTasks]);
+    } else {
+      setCompletedTasks(completedTasks.filter(t => t.id !== task.id));
+      setPendingTasks([{ ...task, is_completed: false }, ...pendingTasks]);
+    }
+
+    try {
+      await api.put(`/tasks/${task.id}/change_status/`, { is_completed: isNowCompleted });
+      
+      fetchPending(pendingPage, searchQuery, filterCategory);
+      fetchCompleted(completedPage, searchQuery, filterCategory);
+
     } catch (error) {
-      console.error("Failed to fetch filtered tasks:", error);
-    } finally {
-      setIsLoading(false);
+      setPendingTasks(originalPending);
+      setCompletedTasks(originalCompleted);
+      alert("Error syncing with server. Reverting changes.");
     }
   }
 
@@ -59,44 +117,19 @@ export function useDashboard() {
     setIsProcessing(true);
     try {
       if (taskToEdit) {
-        const response = await api.patch(`/tasks/${taskToEdit.id}/`, taskData);
-        setTasks(tasks.map((t) => (t.id === taskToEdit.id ? response.data : t)));
+        await api.patch(`/tasks/${taskToEdit.id}/`, taskData);
+        if (taskToEdit.is_completed) fetchCompleted(completedPage, searchQuery, filterCategory);
+        else fetchPending(pendingPage, searchQuery, filterCategory);
       } else {
-        const response = await api.post('/tasks/', { ...taskData, is_completed: false });
-        setTasks([response.data, ...tasks]);
+        await api.post('/tasks/', { ...taskData, is_completed: false });
+        fetchPending(1, searchQuery, filterCategory);
       }
       setIsTaskModalOpen(false);
       setTaskToEdit(null);
-    } catch (error) {
-      console.error("Failed to save task:", error);
-      alert("Error saving task.");
-    } finally {
-      setIsProcessing(false);
-    }
-  }
-
-  async function handleToggleComplete(task) {
-    const newStatus = !task.is_completed;
-    
-    const originalTasks = [...tasks];
-
-    setTasks(tasks.map((t) => 
-      t.id === task.id ? { ...t, is_completed: newStatus } : t
-    ));
-
-    try {
-      const response = await api.put(`/tasks/${task.id}/change_status/`, { 
-        is_completed: newStatus 
-      });
-
-      setTasks((currentTasks) => currentTasks.map((t) => 
-        t.id === task.id ? response.data.task : t
-      ));
-
-    } catch (error) {
-      console.error("Failed to update task status:", error);
-      setTasks(originalTasks);
-      alert("Error syncing with server. Reverting changes.");
+    } catch (error) { 
+      alert("Error saving task."); 
+    } finally { 
+      setIsProcessing(false); 
     }
   }
 
@@ -105,45 +138,43 @@ export function useDashboard() {
     setIsProcessing(true);
     try {
       await api.delete(`/tasks/${taskToDelete.id}/`);
-      setTasks(tasks.filter((t) => t.id !== taskToDelete.id));
+      
+      if (taskToDelete.is_completed) setCompletedTasks(completedTasks.filter(t => t.id !== taskToDelete.id));
+      else setPendingTasks(pendingTasks.filter(t => t.id !== taskToDelete.id));
+      
+      if (taskToDelete.is_completed) fetchCompleted(completedPage, searchQuery, filterCategory);
+      else fetchPending(pendingPage, searchQuery, filterCategory);
+      
       setIsDeleteModalOpen(false);
       setTaskToDelete(null);
-    } catch (error) {
-      console.error("Failed to delete task:", error);
-    } finally {
-      setIsProcessing(false);
+    } catch (error) { 
+      console.error(error);
+    } finally { 
+      setIsProcessing(false); 
     }
   }
 
   async function handleCreateCategory(name) {
     setIsProcessing(true);
     try {
-      const response = await api.post('/categories/', { name });
-      setCategories([response.data, ...categories]);
-    } catch (error) {
-      console.error("Failed to create category", error);
-    } finally {
-      setIsProcessing(false);
-    }
+      const res = await api.post('/categories/', { name });
+      setCategories([res.data, ...categories]);
+    } catch (e) {} finally { setIsProcessing(false); }
   }
 
   async function handleUpdateCategory(id, name) {
     try {
-      const response = await api.put(`/categories/${id}/`, { name });
-      setCategories(categories.map(c => c.id === id ? response.data : c));
-    } catch (error) {
-      console.error("Failed to update category", error);
-    }
+      const res = await api.put(`/categories/${id}/`, { name });
+      setCategories(categories.map(c => c.id === id ? res.data : c));
+    } catch (e) {}
   }
 
   async function handleDeleteCategory(id) {
     try {
       await api.delete(`/categories/${id}/`);
       setCategories(categories.filter(c => c.id !== id));
-      setTasks(tasks.map(t => t.category === id ? { ...t, category: null } : t));
-    } catch (error) {
-      alert("Cannot delete this category. It might be linked to existing tasks.");
-    }
+      fetchFilteredTasks();
+    } catch (e) { alert("Cannot delete category."); }
   }
 
   const getCategoryName = (categoryId) => {
@@ -151,17 +182,15 @@ export function useDashboard() {
     return cat ? cat.name : null;
   };
 
-  const pendingTasks = tasks.filter(task => !task.is_completed);
-  const completedTasks = tasks.filter(task => task.is_completed);
-
   return {
-    tasks, pendingTasks, completedTasks, categories, isLoading, isProcessing,
+    pendingTasks, pendingPage, pendingHasNext, pendingHasPrev, nextPendingPage, prevPendingPage,
+    completedTasks, completedPage, completedHasNext, completedHasPrev, nextCompletedPage, prevCompletedPage,
+    categories, isLoading, isProcessing,
     searchQuery, setSearchQuery, filterCategory, setFilterCategory, fetchFilteredTasks,
     isTaskModalOpen, setIsTaskModalOpen, taskToEdit, setTaskToEdit,
     isDeleteModalOpen, setIsDeleteModalOpen, taskToDelete, setTaskToDelete,
     isCategoryModalOpen, setIsCategoryModalOpen,
     handleSaveTask, handleToggleComplete, handleDeleteTask,
-    handleCreateCategory, handleUpdateCategory, handleDeleteCategory,
-    getCategoryName
+    handleCreateCategory, handleUpdateCategory, handleDeleteCategory, getCategoryName
   };
 }
