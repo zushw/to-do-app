@@ -13,6 +13,10 @@ export function Dashboard() {
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -69,6 +73,30 @@ export function Dashboard() {
     } catch (error) {
       console.error("Failed to update task:", error);
       alert("Error updating task status. Please try again.");
+    }
+  }
+
+  function handleDeleteClick(task) {
+    setTaskToDelete(task);
+    setIsDeleteModalOpen(true);
+  }
+
+  async function confirmDeleteTask() {
+    if (!taskToDelete) return;
+    setIsDeleting(true);
+
+    try {
+      await api.delete(`/tasks/${taskToDelete.id}/`);
+      
+      setTasks(tasks.filter((t) => t.id !== taskToDelete.id));
+      
+      setIsDeleteModalOpen(false);
+      setTaskToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+      alert("Error deleting task. Please try again.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -149,8 +177,13 @@ export function Dashboard() {
                     </div>
                     
                     <div className="flex space-x-2">
-                      <button className="text-sm text-gray-400 hover:text-blue-600 transition-colors">Edit</button>
-                      <button className="text-sm text-gray-400 hover:text-red-600 transition-colors">Delete</button>
+                        <button className="text-sm text-gray-400 hover:text-blue-600 transition-colors">Edit</button>
+                        <button 
+                            onClick={() => handleDeleteClick(task)}
+                            className="text-sm text-gray-400 hover:text-red-600 transition-colors"
+                        >
+                        Delete
+                        </button>
                     </div>
                   </div>
                 </li>
@@ -218,6 +251,34 @@ export function Dashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900">Delete Task</h3>
+            <p className="mt-2 text-sm text-gray-500">
+              Are you sure you want to delete <strong className="text-gray-700">"{taskToDelete?.title}"</strong>? This action cannot be undone.
+            </p>
+            
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={isDeleting}
+                className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteTask}
+                disabled={isDeleting}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:bg-red-400"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}
