@@ -56,6 +56,22 @@ export function Dashboard() {
     }
   }
 
+  async function handleToggleComplete(task) {
+    try {
+      const newStatus = !task.is_completed;
+      
+      const response = await api.put(`/tasks/${task.id}/change_status/`, {
+        is_completed: newStatus
+      });
+
+      setTasks(tasks.map((t) => (t.id === task.id ? response.data.task : t)));
+      
+    } catch (error) {
+      console.error("Failed to update task:", error);
+      alert("Error updating task status. Please try again.");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 font-sans text-gray-800">
       
@@ -105,14 +121,16 @@ export function Dashboard() {
                 <li key={task.id} className="p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-3">
+                      
                     <div className="mt-1">
-                      <input
-                        type="checkbox"
-                        checked={task.is_completed}
-                        readOnly
-                        className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                      />
+                        <input
+                          type="checkbox"
+                          checked={task.is_completed}
+                          onChange={() => handleToggleComplete(task)}
+                          className="h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
                     </div>
+                      
                     <div>
                       <h3 className={`text-base font-medium ${task.is_completed ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
                         {task.title}
