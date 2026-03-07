@@ -56,11 +56,27 @@ export function useDashboard() {
   }
 
   async function handleToggleComplete(task) {
+    const newStatus = !task.is_completed;
+    
+    const originalTasks = [...tasks];
+
+    setTasks(tasks.map((t) => 
+      t.id === task.id ? { ...t, is_completed: newStatus } : t
+    ));
+
     try {
-      const response = await api.put(`/tasks/${task.id}/change_status/`, { is_completed: !task.is_completed });
-      setTasks(tasks.map((t) => (t.id === task.id ? response.data.task : t)));
+      const response = await api.put(`/tasks/${task.id}/change_status/`, { 
+        is_completed: newStatus 
+      });
+
+      setTasks((currentTasks) => currentTasks.map((t) => 
+        t.id === task.id ? response.data.task : t
+      ));
+
     } catch (error) {
       console.error("Failed to update task status:", error);
+      setTasks(originalTasks);
+      alert("Error syncing with server. Reverting changes.");
     }
   }
 
