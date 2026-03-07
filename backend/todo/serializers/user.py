@@ -17,7 +17,7 @@ def validate_strong_password(password):
     return password
 
 class UserSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True)
+    email = serializers.EmailField(required=False)
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password']
