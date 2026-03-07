@@ -12,7 +12,8 @@ export function Dashboard() {
   const { user, signOut } = useContext(AuthContext);
   
   const {
-    tasks, categories, isLoading, isProcessing,
+    tasks, pendingTasks, completedTasks,
+    categories, isLoading, isProcessing,
     isTaskModalOpen, setIsTaskModalOpen, taskToEdit, setTaskToEdit,
     isDeleteModalOpen, setIsDeleteModalOpen, taskToDelete, setTaskToDelete,
     isCategoryModalOpen, setIsCategoryModalOpen,
@@ -52,18 +53,50 @@ export function Dashboard() {
           ) : tasks.length === 0 ? (
             <div className="p-8 text-center text-gray-500">You don't have any tasks yet. Create one above!</div>
           ) : (
-            <ul className="divide-y divide-gray-200">
-              {tasks.map((task) => (
-                <TaskItem 
-                  key={task.id}
-                  task={task}
-                  categoryName={getCategoryName(task.category)}
-                  onToggleComplete={handleToggleComplete}
-                  onEdit={() => { setTaskToEdit(task); setIsTaskModalOpen(true); }}
-                  onDelete={() => { setTaskToDelete(task); setIsDeleteModalOpen(true); }}
-                />
-              ))}
-            </ul>
+            <div className="divide-y divide-gray-200">
+              
+              {pendingTasks.length > 0 ? (
+                <ul className="divide-y divide-gray-200">
+                  {pendingTasks.map((task) => (
+                    <TaskItem 
+                      key={task.id} 
+                      task={task} 
+                      categoryName={getCategoryName(task.category)}
+                      onToggleComplete={handleToggleComplete}
+                      onEdit={() => { setTaskToEdit(task); setIsTaskModalOpen(true); }}
+                      onDelete={() => { setTaskToDelete(task); setIsDeleteModalOpen(true); }}
+                    />
+                  ))}
+                </ul>
+              ) : (
+                <div className="p-8 text-center text-gray-500 italic">
+                  No pending tasks. Great job!
+                </div>
+              )}
+
+              {completedTasks.length > 0 && (
+                <div>
+                  <div className="bg-gray-50 px-4 py-2 border-y border-gray-200">
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Completed ({completedTasks.length})
+                    </h3>
+                  </div>
+                  <ul className="divide-y divide-gray-200 opacity-75 bg-gray-50/50">
+                    {completedTasks.map((task) => (
+                      <TaskItem 
+                        key={task.id} 
+                        task={task} 
+                        categoryName={getCategoryName(task.category)}
+                        onToggleComplete={handleToggleComplete}
+                        onEdit={() => { setTaskToEdit(task); setIsTaskModalOpen(true); }}
+                        onDelete={() => { setTaskToDelete(task); setIsDeleteModalOpen(true); }}
+                      />
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+            </div>
           )}
         </div>
       </main>

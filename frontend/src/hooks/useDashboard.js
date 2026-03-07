@@ -115,8 +115,11 @@ export function useDashboard() {
     return cat ? cat.name : null;
   };
 
+  const pendingTasks = tasks.filter(task => !task.is_completed);
+  const completedTasks = tasks.filter(task => task.is_completed);
+
   return {
-    tasks, categories, isLoading, isProcessing,
+    tasks, pendingTasks, completedTasks, categories, isLoading, isProcessing,
     isTaskModalOpen, setIsTaskModalOpen, taskToEdit, setTaskToEdit,
     isDeleteModalOpen, setIsDeleteModalOpen, taskToDelete, setTaskToDelete,
     isCategoryModalOpen, setIsCategoryModalOpen,
