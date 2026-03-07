@@ -30,6 +30,9 @@ export function Dashboard() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
 
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -161,6 +164,34 @@ export function Dashboard() {
       console.error("Failed to create category", error);
     } finally {
       setIsCategoryLoading(false);
+    }
+  }
+
+  function startEditingCategory(category) {
+    setEditingCategoryId(category.id);
+    setEditingCategoryName(category.name);
+  }
+
+  function cancelEditingCategory() {
+    setEditingCategoryId(null);
+    setEditingCategoryName('');
+  }
+
+  async function handleUpdateCategory(categoryId) {
+    if (!editingCategoryName.trim()) {
+      cancelEditingCategory();
+      return;
+    }
+
+    try {
+      const response = await api.put(`/categories/${categoryId}/`, { name: editingCategoryName });
+      
+      setCategories(categories.map(c => c.id === categoryId ? response.data : c));
+      
+      cancelEditingCategory();
+    } catch (error) {
+      console.error("Failed to update category", error);
+      alert("Error updating category name.");
     }
   }
 
@@ -433,14 +464,54 @@ export function Dashboard() {
                 <ul className="divide-y divide-gray-200">
                   {categories.map(cat => (
                     <li key={cat.id} className="flex items-center justify-between p-3 hover:bg-gray-50">
-                      <span className="text-sm font-medium text-gray-900">{cat.name}</span>
-                      <button 
-                        onClick={() => handleDeleteCategory(cat.id)}
-                        className="text-xs font-medium text-red-500 hover:text-red-700"
-                        title="Delete category"
-                      >
-                        Delete
-                      </button>
+                      
+                      {editingCategoryId === cat.id ? (
+                        <div className="flex w-full items-center space-x-2">
+                          <input
+                            type="text"
+                            autoFocus
+                            className="flex-1 rounded border border-blue-500 px-2 py-1 text-sm outline-none"
+                            value={editingCategoryName}
+                            onChange={(e) => setEditingCategoryName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleUpdateCategory(cat.id);
+                              if (e.key === 'Escape') cancelEditingCategory();
+                            }}
+                          />
+                          <button 
+                            onClick={() => handleUpdateCategory(cat.id)}
+                            className="text-xs font-bold text-green-600 hover:text-green-800"
+                          >
+                            Save
+                          </button>
+                          <button 
+                            onClick={cancelEditingCategory}
+                            className="text-xs font-medium text-gray-500 hover:text-gray-700"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-sm font-medium text-gray-900">{cat.name}</span>
+                          <div className="flex space-x-3">
+                            <button 
+                              onClick={() => startEditingCategory(cat)}
+                              className="text-xs font-medium text-blue-500 hover:text-blue-700"
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteCategory(cat.id)}
+                              className="text-xs font-medium text-red-500 hover:text-red-700"
+                              title="Delete category"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </>
+                      )}
+                      
                     </li>
                   ))}
                 </ul>
