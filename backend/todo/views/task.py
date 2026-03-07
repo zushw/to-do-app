@@ -65,6 +65,44 @@ class TaskViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
         
+    @action(detail=True, methods=['post'])
+    def unshare(self, request, pk=None):
+        task = self.get_object()
+
+        if task.owner != request.user:
+            return Response(
+                {"detail": "Only the owner can unshare the task."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        username = request.data.get('username')
+        if not username:
+            return Response(
+                {"detail": "Please, fill the 'username' field."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user_to_unshare = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "User not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if user_to_unshare == request.user:
+            return Response(
+                {"detail": "You can't unshare a task with yourself."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        task.shared_with.remove(user_to_unshare)
+        
+        return Response(
+            {"detail": f"Task unshared successfully with {user_to_unshare.username}!"},
+            status=status.HTTP_200_OK
+        )
+        
     @action(detail=True, methods=['put'])
     def change_status(self, request, pk=None):
         task = self.get_object()
