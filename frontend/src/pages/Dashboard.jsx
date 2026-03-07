@@ -17,6 +17,12 @@ export function Dashboard() {
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState(null);
+  const [editTaskTitle, setEditTaskTitle] = useState('');
+  const [editTaskDescription, setEditTaskDescription] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -100,6 +106,37 @@ export function Dashboard() {
     }
   }
 
+  function handleEditClick(task) {
+    setTaskToEdit(task);
+    setEditTaskTitle(task.title);
+    setEditTaskDescription(task.description || '');
+    setIsEditModalOpen(true);
+  }
+
+  async function handleUpdateTask(e) {
+    e.preventDefault();
+    if (!taskToEdit) return;
+    
+    setIsEditing(true);
+
+    try {
+      const response = await api.patch(`/tasks/${taskToEdit.id}/`, {
+        title: editTaskTitle,
+        description: editTaskDescription
+      });
+
+      setTasks(tasks.map((t) => (t.id === taskToEdit.id ? response.data : t)));
+      
+      setIsEditModalOpen(false);
+      setTaskToEdit(null);
+    } catch (error) {
+      console.error("Failed to update task:", error);
+      alert("Error updating task. Please try again.");
+    } finally {
+      setIsEditing(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 font-sans text-gray-800">
       
@@ -177,7 +214,12 @@ export function Dashboard() {
                     </div>
                     
                     <div className="flex space-x-2">
-                        <button className="text-sm text-gray-400 hover:text-blue-600 transition-colors">Edit</button>
+                        <button 
+                            onClick={() => handleEditClick(task)}
+                            className="text-sm text-gray-400 hover:text-blue-600 transition-colors"
+                        >
+                        Edit
+                        </button>
                         <button 
                             onClick={() => handleDeleteClick(task)}
                             className="text-sm text-gray-400 hover:text-red-600 transition-colors"
@@ -283,6 +325,64 @@ export function Dashboard() {
         </div>
       )}
 
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900">Edit Task</h3>
+              <button 
+                onClick={() => setIsEditModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateTask} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Title</label>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  value={editTaskTitle}
+                  onChange={(e) => setEditTaskTitle(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Description (Optional)</label>
+                <textarea
+                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  rows="3"
+                  value={editTaskDescription}
+                  onChange={(e) => setEditTaskDescription(e.target.value)}
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isEditing || !editTaskTitle.trim()}
+                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-blue-400"
+                >
+                  {isEditing ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
