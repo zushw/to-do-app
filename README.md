@@ -29,7 +29,7 @@ The project is a web-based task management system (To-Do List) designed to allow
 ## Tech Stack
 
 - Backend: Developed in Python using Django REST Framework.
-- Frontend: Developed in ReactJS.
+- Frontend: Developed in React + Vite using Tailwind CSS and Axios.
 - Quality: Unit tests in the backend using ```pytest``` and E2E tests in frontend using ```Selenium```.
 - Infrastructure: Fully containerized application using Docker and Docker Compose.
 - DevOps: CI/CD Pipeline configured for continuos code validation. 
