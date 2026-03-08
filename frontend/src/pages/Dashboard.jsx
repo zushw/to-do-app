@@ -31,7 +31,7 @@ export function Dashboard() {
     <div className="min-h-screen bg-gray-100 font-sans text-gray-800 flex flex-col">
       <Navbar user={user} onSignOut={signOut} />
 
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="flex-1 mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">
         
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">My Tasks</h2>
@@ -64,12 +64,12 @@ export function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             
-            <div className="flex flex-col bg-white rounded-lg shadow border border-gray-200 min-h-[400px]">
-              <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 rounded-t-lg">
+            <div className="flex flex-col bg-white rounded-lg shadow border border-gray-200 min-h-[430px] h-[calc(100vh-300px)]">
+              <div className="border-b border-gray-200 bg-gray-50 px-4 py-3 rounded-t-lg shrink-0">
                 <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">To Do</h3>
               </div>
               
-              <ul className="divide-y divide-gray-200 flex-1 overflow-y-auto max-h-[60vh]">
+              <ul className="divide-y divide-gray-200 flex-1 overflow-y-auto custom-scrollbar">
                 {pendingTasks.length === 0 ? (
                   <div className="p-8 text-center text-gray-500 italic">No pending tasks. You're all caught up!</div>
                 ) : (
@@ -79,15 +79,17 @@ export function Dashboard() {
                 )}
               </ul>
               
-              <Pagination page={pendingPage} hasNext={pendingHasNext} hasPrev={pendingHasPrev} onNext={nextPendingPage} onPrev={prevPendingPage} />
+              <div className="shrink-0">
+                <Pagination page={pendingPage} hasNext={pendingHasNext} hasPrev={pendingHasPrev} onNext={nextPendingPage} onPrev={prevPendingPage} />
+              </div>
             </div>
 
-            <div className="flex flex-col bg-white rounded-lg shadow border border-gray-200 min-h-[400px]">
-              <div className="border-b border-gray-200 bg-blue-50 px-4 py-3 rounded-t-lg">
+            <div className="flex flex-col bg-white rounded-lg shadow border border-gray-200 min-h-[430px] h-[calc(100vh-300px)]">
+              <div className="border-b border-gray-200 bg-blue-50 px-4 py-3 rounded-t-lg shrink-0">
                 <h3 className="text-sm font-bold text-blue-700 uppercase tracking-wider">Completed</h3>
               </div>
               
-              <ul className="divide-y divide-gray-200 flex-1 overflow-y-auto max-h-[60vh] opacity-80">
+              <ul className="divide-y divide-gray-200 flex-1 overflow-y-auto opacity-80 custom-scrollbar">
                 {completedTasks.length === 0 ? (
                   <div className="p-8 text-center text-gray-500 italic">No tasks completed yet. Let's get to work!</div>
                 ) : (
@@ -97,7 +99,9 @@ export function Dashboard() {
                 )}
               </ul>
 
-              <Pagination page={completedPage} hasNext={completedHasNext} hasPrev={completedHasPrev} onNext={nextCompletedPage} onPrev={prevCompletedPage} />
+              <div className="shrink-0">
+                <Pagination page={completedPage} hasNext={completedHasNext} hasPrev={completedHasPrev} onNext={nextCompletedPage} onPrev={prevCompletedPage} />
+              </div>
             </div>
 
           </div>
