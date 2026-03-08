@@ -18,6 +18,7 @@ export function useRegister() {
     setIsLoading(true);
 
     try {
+      console.log("URL do Backend:", import.meta.env.VITE_API_URL);
       await api.post('/auth/register/', { username, email, password });
       navigate('/login');
     } catch (err) {
