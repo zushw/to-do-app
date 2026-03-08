@@ -1,64 +1,106 @@
-# Overview
+# Visão Geral
 
-The project is a web-based task management system (To-Do List) designed to allow users to organize their daily lives through categories, while also enabling collaborative work through task sharing.
+O projeto é um sistema de gerenciamento de tarefas baseado na web (To-Do List) projetado para permitir que os usuários organizem suas vidas diárias por meio de categorias, ao mesmo tempo em que permite o trabalho colaborativo através do compartilhamento de tarefas.
 
+## Levantamento de Requisitos
 
-## Requirements Gathering
+### Requisitos Funcionais
 
-### Functional Requirements
+- Criação de conta e autenticação de usuário (Login/Logout).
+- CRUD completo para tarefas.
+- CRUD para categorias para organizar tarefas.
+- Funcionalidade de compartilhamento de tarefas entre usuários.
+- Alternância de status da tarefa (Concluída / Não concluída).
+- Filtragem de tarefas (por status ou categoria).
+- Paginação na lista de tarefas.
+- Integração com uma API externa.
 
-- Account creation and user authentication (Login/Logout).
-- Full CRUD for tasks.
-- CRUD for categories to organize tasks.
-- Task sharing functionality between users.
-- Task status toggling (Completed / Not completed).
-- Task filtering (by status or category).
-- Pagination in the task list.
-- Integration with an external API.
+### Requisitos Não Funcionais
 
-### Non-Functional Requirements
+- Segurança: 
+    - As senhas dos usuários devem ser criptografadas (hashed).
+    - Os usuários só podem acessar, modificar ou excluir suas próprias tarefas.
+- Desempenho: Os tempos de resposta da API devem ser otimizados utilizando paginação.
+- Usabilidade: A interface do usuário deve ser responsiva.
+- Manutenibilidade: A base de código deve ser modular, aderindo a padrões de projeto e melhores práticas (SOLID, DRY, KISS) para garantir a escalabilidade futura e a facilidade de manutenção.
+- Disponibilidade e Portabilidade: O sistema deve ser facilmente portátil e capaz de rodar de forma consistente em diferentes ambientes.
 
-- Security: 
-    - User passwords must be hashed.
-    - Users can only access, modify, or delete their own tasks.
-- Performance: API response times must be optimized utilizing pagination.
-- Usability: The user interface must be responsive.
-- Maintainability: The codebase must be modular, adhering to design patterns and best practices (SOLID, DRY, KISS) to ensure future scalability and ease of maintenance.
-- Availability & Portability: The system must be easily portable and capable of running consistently across different environments.
+## Tecnologias Utilizadas
 
-## Tech Stack
+- Backend: Desenvolvido em Python utilizando Django REST Framework.
+- Frontend: Desenvolvido em React + Vite utilizando Tailwind CSS e Axios.
+- Qualidade: Testes unitários no backend usando `pytest` e testes E2E no frontend usando `Selenium`.
+- Infraestrutura: Aplicação totalmente conteinerizada usando Docker e Docker Compose.
+- DevOps: Pipeline de CI/CD configurada para validação contínua de código.
+- Deploy: Hospedagem em nuvem (AWS ou Azure).
 
-- Backend: Developed in Python using Django REST Framework.
-- Frontend: Developed in React + Vite using Tailwind CSS and Axios.
-- Quality: Unit tests in the backend using ```pytest``` and E2E tests in frontend using ```Selenium```.
-- Infrastructure: Fully containerized application using Docker and Docker Compose.
-- DevOps: CI/CD Pipeline configured for continuos code validation. 
-- Deploy: Cloud hosting (AWS or Azure).
+## Rodando o projeto
 
-## Database Architecture
+### Pre requisitos
+- Docker instalado.
+- Docker Compose instalado.
 
-### Entities and Relationships
+### Instalação e setup
+
+1. Clonar o repositório:
+
+```bash
+git clone https://github.com/zushw/to-do-app.git
+cd to-do-app
+```
+
+2. Rodar Docker Compose:
+```bash
+docker-compose up --build
+```
+
+3. Migrações do Banco de dados:
+```bash
+docker-compose exec backend python manage.py migrate
+```
+
+4. Criar um super user (Opcional):
+```bash
+docker-compose exec backend python manage.py createsuperuser
+```
+
+### Acessando a aplicação
+
+| Serviço | URL | 
+| :--- | :--- | 
+| **Frontend (React)** | [http://localhost:5173](http://localhost:5173) | 
+| **Backend API** | [http://localhost:8000/api/v1](http://localhost:8000/api/v1) | 
+| **Django Admin** | [http://localhost:8000/admin](http://localhost:8000/admin) | 
+
+## Deploy em prod (Azure)
+
+- Frontend: https://thankful-sea-04872d00f.6.azurestaticapps.net
+- Backend API: https://todo-backend-api-g5aphmazfwetdghs.brazilsouth-01.azurewebsites.net/api/v1
+
+## Arquitetura de banco de dados
+
+### Entidades e Relacionamentos
 
 1. User:
-    - Handled by Django's default authentication system.
-    - Fields: ```id```, ```username```, ```email```, ```password```.
+    - Gerenciado pelo sistema de autenticação padrão do Django.
+    - Campos: ```id```, ```username```, ```email```, ```password```.
 
 2. Category:
-    - User to group and organize tasks.
-    - Fields:
+    - Usada para agrupar e organizar tarefas.
+    - Campos:
         - ```id``` (Primary Key)
-        - ```name``` (String, max 100 chars)
-        - ```owner``` (Foreign Key -> ```User```): Ensures users only see their own categories.
+        - ```name``` (String, max 100 caracteres)
+        - ```owner``` (Foreign Key -> ```User```): Garante que os usuários vejam apenas suas próprias categorias.
 
 3. Tasks:
-    - The core entity of the application.
-    - Fields: 
+    - A entidade central da aplicação.
+    - Campos: 
         - ```id``` (Primary Key)
-        - ```title``` (String, max 200 chars)
-        - ```description``` (Text, optional)
-        - ```is_completed``` (Boolean, default: False)
-        - ```created_at``` (DateTime, auto-generated)
-        - ```category``` (Foreign Key -> ```Category```, optional)
-        - ```owner``` (Foreign Key -> ```User```): The creator of the task.
-        - ```shared_with``` (ManyToMany -> ```User```): Allows multiple users to view/interact with the task.
-        - ```external_quote``` (Text, optional): Stores the data fetched from the external API (e.g., a motivational quote saved when the task is completed).
+        - ```title``` (String, máximo de 200 caracteres)
+        - ```description``` (Text, opcional)
+        - ```is_completed``` (Boolean, padrão: False)
+        - ```created_at``` (DateTime, gerado automaticamente)
+        - ```category``` (Foreign Key -> ```Category```, opcional)
+        - ```owner``` (Foreign Key -> ```User```): O criador da tarefa.
+        - ```shared_with``` (ManyToMany -> ```User```): Permite que múltiplos usuários visualizem/interajam com a tarefa.
+        - ```external_quote``` (Text, opcional): Armazena os dados obtidos da API externa (por exemplo, uma frase motivacional salva quando a tarefa é concluída).
