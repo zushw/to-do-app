@@ -16,7 +16,7 @@ export function Dashboard() {
   const {
     pendingTasks, pendingPage, pendingHasNext, pendingHasPrev, nextPendingPage, prevPendingPage,
     completedTasks, completedPage, completedHasNext, completedHasPrev, nextCompletedPage, prevCompletedPage,
-    categories, isLoading, isProcessing,
+    categories, isLoading, isProcessing, fetchCategories, fetchUsers,
     searchQuery, setSearchQuery, filterCategory, setFilterCategory, fetchFilteredTasks,
     isTaskModalOpen, setIsTaskModalOpen, taskToEdit, setTaskToEdit,
     isDeleteModalOpen, setIsDeleteModalOpen, taskToDelete, setTaskToDelete,
@@ -26,6 +26,13 @@ export function Dashboard() {
     isShareModalOpen, setIsShareModalOpen, taskToShare, setTaskToShare,
     handleShareTask, handleUnshareTask, usersList
   } = useDashboard();
+
+  function handleToggleCategoriesModal(isOpen){
+    if (isOpen) {
+      fetchCategories()
+    }
+    setIsCategoryModalOpen(isOpen)
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans text-gray-800 flex flex-col">

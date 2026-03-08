@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import api from '../services/api';
+import { useState, useEffect, useCallback } from 'react';import api from '../services/api';
 import { getApiErrorMessage } from '../utils';
 
 export function useDashboard() {
@@ -33,39 +32,7 @@ export function useDashboard() {
 
   const [usersList, setUsersList] = useState([]);
 
-  useEffect(() => {
-    fetchInitialData();
-  }, []);
-
-  async function fetchInitialData() {
-    setIsLoading(true);
-    try {
-      const [pendingRes, completedRes, categoriesRes, usersRes] = await Promise.all([
-        api.get('/tasks/', { params: { is_completed: 'false', page: 1 } }),
-        api.get('/tasks/', { params: { is_completed: 'true', page: 1 } }),
-        api.get('/categories/'),
-        api.get('/users/')
-      ]);
-
-      setPendingTasks(pendingRes.data.results);
-      setPendingHasNext(!!pendingRes.data.next);
-      setPendingHasPrev(!!pendingRes.data.previous);
-
-      setCompletedTasks(completedRes.data.results);
-      setCompletedHasNext(!!completedRes.data.next);
-      setCompletedHasPrev(!!completedRes.data.previous);
-
-      setCategories(categoriesRes.data.results);
-
-      setUsersList(usersRes.data.results || usersRes.data);
-    } catch (error) {
-      console.error("Failed to load initial data", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  const fetchPending = async (page = pendingPage, search = searchQuery, cat = filterCategory) => {
+  const fetchPending = useCallback(async (page, search, cat) => {
     try {
       const res = await api.get('/tasks/', { params: { is_completed: 'false', page, search: search || undefined, category: cat || undefined } });
       setPendingTasks(res.data.results);
@@ -73,9 +40,9 @@ export function useDashboard() {
       setPendingHasPrev(!!res.data.previous);
       setPendingPage(page);
     } catch (error) { console.error(error); }
-  };
+  }, []);
 
-  const fetchCompleted = async (page = completedPage, search = searchQuery, cat = filterCategory) => {
+  const fetchCompleted = useCallback(async (page, search, cat) => {
     try {
       const res = await api.get('/tasks/', { params: { is_completed: 'true', page, search: search || undefined, category: cat || undefined } });
       setCompletedTasks(res.data.results);
@@ -83,11 +50,59 @@ export function useDashboard() {
       setCompletedHasPrev(!!res.data.previous);
       setCompletedPage(page);
     } catch (error) { console.error(error); }
-  };
+  }, []);
 
-  const fetchFilteredTasks = async (search = searchQuery, category = filterCategory) => {
+  const fetchCategories = useCallback(async () => {
+    try {
+      const categoriesRes = await api.get('/categories/');
+      setCategories(categoriesRes.data.results);
+    } catch (error) { console.error(error); }
+  }, []);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const usersRes = await api.get('/users/');
+      setUsersList(usersRes.data.results || usersRes.data);
+    } catch (error) { console.error(error); }
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true; 
+
+    const loadAllTasks = async () => {
+      await Promise.all([ 
+        fetchPending(pendingPage, searchQuery, filterCategory), 
+        fetchCompleted(completedPage, searchQuery, filterCategory) 
+      ]);
+    };
+
+    const loadInitialData = async () => {
+      setIsLoading(true);
+      await Promise.all([loadAllTasks(), fetchCategories(), fetchUsers()]);
+      if (isMounted) setIsLoading(false);
+    };
+
+    loadInitialData();
+
+    const intervalId = setInterval(() => {
+      if (isMounted) {
+        loadAllTasks();
+        fetchCategories(); 
+      }
+    }, 30000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [fetchPending, fetchCompleted, fetchCategories, fetchUsers, pendingPage, completedPage, searchQuery, filterCategory]);
+
+  const fetchFilteredTasks = async () => {
     setIsLoading(true);
-    await Promise.all([ fetchPending(1, search, category), fetchCompleted(1, search, category) ]);
+    await Promise.all([ 
+      fetchPending(1, searchQuery, filterCategory), 
+      fetchCompleted(1, searchQuery, filterCategory) 
+    ]);
     setIsLoading(false);
   };
 
@@ -245,7 +260,7 @@ export function useDashboard() {
   return {
     pendingTasks, pendingPage, pendingHasNext, pendingHasPrev, nextPendingPage, prevPendingPage,
     completedTasks, completedPage, completedHasNext, completedHasPrev, nextCompletedPage, prevCompletedPage,
-    categories, isLoading, isProcessing,
+    categories, isLoading, isProcessing, fetchCategories, fetchUsers,
     searchQuery, setSearchQuery, filterCategory, setFilterCategory, fetchFilteredTasks,
     isTaskModalOpen, setIsTaskModalOpen, taskToEdit, setTaskToEdit,
     isDeleteModalOpen, setIsDeleteModalOpen, taskToDelete, setTaskToDelete,
