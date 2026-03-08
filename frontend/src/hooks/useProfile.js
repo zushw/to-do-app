@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import api from '../services/api';
+import { getApiErrorMessage } from '../utils';
 
 export function useProfile() {
   const { user, updateUser } = useContext(AuthContext);
@@ -63,7 +64,7 @@ export function useProfile() {
       setConfirmPassword('');
     } catch (error) {
       console.error(error);
-      setPasswordMessage({ type: 'error', text: 'Failed to change password. Please check your current password.' });
+      setPasswordMessage({ type: 'error', text: getApiErrorMessage(error) });
     } finally {
       setIsPasswordLoading(false);
     }

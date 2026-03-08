@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 
+import { getApiErrorMessage } from '../utils'; 
+
 export function Register() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
   const [showPassword, setShowPassword] = useState(false);
-  
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,14 +23,9 @@ export function Register() {
       await api.post('/auth/register/', { username, email, password });
       navigate('/login');
     } catch (err) {
-      if (err.response && err.response.data) {
-        const errorData = err.response.data;
-        const firstErrorKey = Object.keys(errorData)[0];
-        const firstErrorMessage = errorData[firstErrorKey][0];
-        setError(`${firstErrorKey.toUpperCase()}: ${firstErrorMessage}`);
-      } else {
-        setError('An unexpected error occurred. Please try again.');
-      }
+      
+      setError(getApiErrorMessage(err));
+      
     } finally {
       setIsLoading(false);
     }
