@@ -40,7 +40,7 @@ export function PasswordChangeForm({
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={isLoading || !currentPassword || !newPassword || !confirmPassword}
+            disabled={isLoading || !currentPassword || !newPassword || !confirmPassword || currentPassword == newPassword}
             className="rounded-md bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? 'Updating...' : 'Update Password'}

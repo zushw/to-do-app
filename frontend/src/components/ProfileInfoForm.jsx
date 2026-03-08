@@ -1,5 +1,5 @@
 export function ProfileInfoForm({ 
-  username, setUsername, email, setEmail, isLoading, message, onSubmit 
+  username, setUsername, email, setEmail, isLoading, message, onSubmit , hasProfileChanges
 }) {
   return (
     <div className="rounded-lg bg-white p-6 shadow border border-gray-200">
@@ -30,7 +30,7 @@ export function ProfileInfoForm({
         </div>
         <div className="flex justify-end">
           <button
-            type="submit" disabled={isLoading}
+            type="submit" disabled={isLoading || !hasProfileChanges}
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
           >
             {isLoading ? 'Saving...' : 'Save Profile'}

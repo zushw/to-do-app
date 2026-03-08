@@ -24,8 +24,13 @@ export function useProfile() {
     }
   }, [user]);
 
+  const hasProfileChanges = username !== user?.username || email !== user?.email;
+
   async function handleUpdateProfile(e) {
     e.preventDefault();
+    
+    if (!hasProfileChanges) return;
+
     setIsProfileLoading(true);
     setProfileMessage({ type: '', text: '' });
 
@@ -75,6 +80,6 @@ export function useProfile() {
     isProfileLoading, profileMessage, handleUpdateProfile,
     currentPassword, setCurrentPassword, newPassword, setNewPassword,
     confirmPassword, setConfirmPassword, isPasswordLoading, passwordMessage,
-    handleChangePassword
+    handleChangePassword, hasProfileChanges
   };
 }
