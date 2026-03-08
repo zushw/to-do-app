@@ -75,3 +75,55 @@ Os testes foram escritos utilizando `pytest` e cobre fluxos de sucesso e falha (
 ```bash
 docker-compose run --rm backend pytest
 ```
+
+## Estrutura do Banco de Dados (ERD)
+
+```mermaid
+erDiagram
+    %% Tabela de Usuários (Baseada no AbstractUser do Django)
+    USER {
+        int id PK
+        varchar(150) username UK "Unique"
+        varchar(254) email UK "Unique"
+        varchar(128) password
+        boolean is_active
+        datetime date_joined
+    }
+
+    %% Tabela de Categorias
+    CATEGORY {
+        int id PK
+        varchar(100) name
+        int owner_id FK "Ref: USER(id)"
+        datetime created_at
+    }
+
+    %% Tabela de Tarefas
+    TASK {
+        int id PK
+        varchar(255) title
+        text description "Nullable"
+        boolean is_completed "Default: False"
+        text external_quote "Nullable"
+        datetime created_at
+        datetime updated_at
+        int owner_id FK "Ref: USER(id)"
+        int category_id FK "Ref: CATEGORY(id) - Nullable"
+    }
+
+    %% Tabela Intermediária M2M (Criada automaticamente pelo Django)
+    TASK_SHARED_WITH {
+        int id PK
+        int task_id FK "Ref: TASK(id)"
+        int user_id FK "Ref: USER(id)"
+    }
+
+    %% Relacionamentos Diretos (1:N)
+    USER ||--o{ CATEGORY : "cria (owner) (1:N)"
+    USER ||--o{ TASK : "é dono de (owner) (1:N)"
+    CATEGORY ||--o{ TASK : "agrupa (category) (1:N)"
+    
+    %% Relacionamentos da Tabela Intermediária (M2M Desconstruído)
+    TASK ||--o{ TASK_SHARED_WITH : "possui (N:N)" 
+    USER ||--o{ TASK_SHARED_WITH : "tem acesso a (N:N)"
+```
