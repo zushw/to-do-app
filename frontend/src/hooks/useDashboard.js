@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
+import { getApiErrorMessage } from '../utils';
 
 export function useDashboard() {
   const [categories, setCategories] = useState([]);
@@ -27,6 +28,11 @@ export function useDashboard() {
 
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [taskToShare, setTaskToShare] = useState(null);
+
+  const [usersList, setUsersList] = useState([]);
+
   useEffect(() => {
     fetchInitialData();
   }, []);
@@ -34,10 +40,11 @@ export function useDashboard() {
   async function fetchInitialData() {
     setIsLoading(true);
     try {
-      const [pendingRes, completedRes, categoriesRes] = await Promise.all([
+      const [pendingRes, completedRes, categoriesRes, usersRes] = await Promise.all([
         api.get('/tasks/', { params: { is_completed: 'false', page: 1 } }),
         api.get('/tasks/', { params: { is_completed: 'true', page: 1 } }),
-        api.get('/categories/')
+        api.get('/categories/'),
+        api.get('/users/')
       ]);
 
       setPendingTasks(pendingRes.data.results);
@@ -49,6 +56,8 @@ export function useDashboard() {
       setCompletedHasPrev(!!completedRes.data.previous);
 
       setCategories(categoriesRes.data.results);
+
+      setUsersList(usersRes.data.results || usersRes.data);
     } catch (error) {
       console.error("Failed to load initial data", error);
     } finally {
@@ -182,6 +191,57 @@ export function useDashboard() {
     return cat ? cat.name : null;
   };
 
+  async function handleShareTask(username) {
+    setIsProcessing(true);
+    try {
+      const response = await api.post(`/tasks/${taskToShare.id}/share/`, { username });
+      
+      const updatedTask = {
+        ...taskToShare,
+        shared_with_usernames: [...(taskToShare.shared_with_usernames || []), username]
+      };
+
+      setTaskToShare(updatedTask);
+
+      if (updatedTask.is_completed) {
+        setCompletedTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+      } else {
+        setPendingTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+      }
+
+      return response.data.detail || "Task shared successfully!";
+    } catch (error) {
+      throw getApiErrorMessage(error);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  async function handleUnshareTask(username) {
+    setIsProcessing(true);
+    try {
+      const response = await api.post(`/tasks/${taskToShare.id}/unshare/`, { username });
+      
+      const updatedTask = {
+        ...taskToShare,
+        shared_with_usernames: taskToShare.shared_with_usernames.filter(u => u !== username)
+      };
+
+      setTaskToShare(updatedTask);
+
+      if (updatedTask.is_completed) {
+        setCompletedTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+      } else {
+        setPendingTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+      }
+
+      return response.data.detail || "Access revoked successfully!";
+    } catch (error) {
+      throw getApiErrorMessage(error);
+    } finally {
+      setIsProcessing(false);
+    }
+  }
   return {
     pendingTasks, pendingPage, pendingHasNext, pendingHasPrev, nextPendingPage, prevPendingPage,
     completedTasks, completedPage, completedHasNext, completedHasPrev, nextCompletedPage, prevCompletedPage,
@@ -191,6 +251,8 @@ export function useDashboard() {
     isDeleteModalOpen, setIsDeleteModalOpen, taskToDelete, setTaskToDelete,
     isCategoryModalOpen, setIsCategoryModalOpen,
     handleSaveTask, handleToggleComplete, handleDeleteTask,
-    handleCreateCategory, handleUpdateCategory, handleDeleteCategory, getCategoryName
-  };
-}
+    handleCreateCategory, handleUpdateCategory, handleDeleteCategory, getCategoryName,
+    isShareModalOpen, setIsShareModalOpen, taskToShare, setTaskToShare, 
+    handleShareTask, handleUnshareTask, usersList
+  }
+};
