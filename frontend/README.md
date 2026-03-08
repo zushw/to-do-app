@@ -95,6 +95,8 @@ Abra um novo terminal na pasta do frontend e utilize os comandos abaixo:
 
 **Para rodar a suíte completa (todos os arquivos em sequência):**
 
+Precisa ter rodado o `npm install`.
+
 ```bash
 npm test -- --runInBand
 ```
