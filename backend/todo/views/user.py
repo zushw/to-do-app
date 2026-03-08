@@ -16,7 +16,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         return User.objects.all().order_by('username')
     
     @extend_schema(request=UserUpdateSerializer, responses=UserPublicSerializer)
-    @action(detail=False, methods=['get', 'patch', 'put'])
+    @action(detail=False, methods=['get', 'patch', 'put', 'delete'])
     def me(self, request):
         user = request.user 
 
@@ -30,6 +30,10 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        elif request.method in ['DELETE']:
+            user.delete() 
+            return Response(status=status.HTTP_204_NO_CONTENT)
     
     @action(detail=False, methods=['post'], url_path='change-password')
     def change_password(self, request):
