@@ -41,8 +41,16 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
+  function updateUser(updatedUserData) {
+    const newUser = { ...user, ...updatedUserData };
+    
+    setUser(newUser);
+    
+    localStorage.setItem('@ToDoApp:user', JSON.stringify(newUser)); 
+  }
+
   return (
-    <AuthContext.Provider value={{ signed: !!user, user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ signed: !!user, user, loading, signIn, signOut, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
