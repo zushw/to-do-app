@@ -41,6 +41,12 @@ export function TaskItem({
             </div>
             
             {task.description && <p className="mt-1 text-sm text-gray-500">{task.description}</p>}
+
+            {task.is_completed && task.external_quote && (
+              <blockquote className="mt-2 border-l-2 border-blue-300 bg-blue-50 pl-3 pr-2 py-1 text-sm italic text-blue-600 rounded-r">
+                "{task.external_quote}"
+              </blockquote>
+            )}
           </div>
         </div>
         
