@@ -1,0 +1,79 @@
+import { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
+import api from '../services/api';
+
+export function useProfile() {
+  const { user, updateUser } = useContext(AuthContext);
+
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    if (user) {
+      setUsername(user.username || '');
+      setEmail(user.email || '');
+    }
+  }, [user]);
+
+  async function handleUpdateProfile(e) {
+    e.preventDefault();
+    setIsProfileLoading(true);
+    setProfileMessage({ type: '', text: '' });
+
+    try {
+      const response = await api.patch('/users/me/', { username, email });
+      updateUser(response.data);
+      setProfileMessage({ type: 'success', text: 'Profile updated successfully!' });
+    } catch (error) {
+      console.error(error);
+      setProfileMessage({ type: 'error', text: 'Failed to update profile. Username or email might be taken.' });
+    } finally {
+      setIsProfileLoading(false);
+    }
+  }
+
+  async function handleChangePassword(e) {
+    e.preventDefault();
+    setPasswordMessage({ type: '', text: '' });
+
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'New passwords do not match.' });
+      return;
+    }
+
+    setIsPasswordLoading(true);
+
+    try {
+      await api.post('/users/change-password/', {
+        current_password: currentPassword,
+        new_password: newPassword
+      });
+      
+      setPasswordMessage({ type: 'success', text: 'Password changed successfully!' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      console.error(error);
+      setPasswordMessage({ type: 'error', text: 'Failed to change password. Please check your current password.' });
+    } finally {
+      setIsPasswordLoading(false);
+    }
+  }
+
+  return {
+    username, setUsername, email, setEmail,
+    isProfileLoading, profileMessage, handleUpdateProfile,
+    currentPassword, setCurrentPassword, newPassword, setNewPassword,
+    confirmPassword, setConfirmPassword, isPasswordLoading, passwordMessage,
+    handleChangePassword
+  };
+}
