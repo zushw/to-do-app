@@ -1,11 +1,17 @@
 import axios from 'axios';
 
+const rawUrl = import.meta.env.VITE_API_URL || '';
+const finalUrl = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: finalUrl,
 });
 
 api.interceptors.request.use(
   (config) => {
+    console.log(import.meta.env.VITE_API_URL)
+    console.log(finalUrl)
+    
     const token = localStorage.getItem('@ToDoApp:token');
 
     if (token) {
