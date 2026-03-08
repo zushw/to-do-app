@@ -14,7 +14,7 @@ export function Profile() {
     isProfileLoading, profileMessage, handleUpdateProfile,
     currentPassword, setCurrentPassword, newPassword, setNewPassword,
     confirmPassword, setConfirmPassword, isPasswordLoading, passwordMessage,
-    handleChangePassword
+    handleChangePassword, handleDeleteAccount, isDeleting
   } = useProfile();
 
   return (
@@ -40,6 +40,22 @@ export function Profile() {
             onSubmit={handleChangePassword}
           />
         </div>
+        <div className="mt-10 border-t border-red-200 pt-8">
+            <h3 className="text-lg font-bold text-red-600">Danger Zone</h3>
+            <p className="mt-1 text-sm text-gray-500 mb-4">
+              Once you delete your account, there is no going back. Please be certain.
+            </p>
+            
+            <button
+              type="button"
+              onClick={handleDeleteAccount}
+              disabled={isDeleting}
+              data-testid="profile-delete-account-button"
+              className="rounded-md bg-red-600 px-4 py-2 font-semibold text-white shadow-sm transition-colors hover:bg-red-700 disabled:bg-red-400"
+            >
+              {isDeleting ? 'Deleting account...' : 'Delete My Account'}
+            </button>
+          </div>
       </main>
     </div>
   );

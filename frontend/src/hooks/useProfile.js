@@ -4,7 +4,9 @@ import api from '../services/api';
 import { getApiErrorMessage } from '../utils';
 
 export function useProfile() {
-  const { user, updateUser } = useContext(AuthContext);
+  const { user, updateUser, signOut } = useContext(AuthContext);
+
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -75,11 +77,30 @@ export function useProfile() {
     }
   }
 
+  async function handleDeleteAccount() {
+    const confirmDelete = window.confirm(
+      "Are you absolutely sure? This action cannot be undone and will permanently delete your account and all your tasks."
+    );
+
+    if (!confirmDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await api.delete('/users/me/'); 
+      
+      signOut(); 
+    } catch (error) {
+      console.error("Failed to delete account", error);
+      alert("Failed to delete account. Please try again.");
+      setIsDeleting(false); 
+    }
+  }
+
   return {
     username, setUsername, email, setEmail,
     isProfileLoading, profileMessage, handleUpdateProfile,
     currentPassword, setCurrentPassword, newPassword, setNewPassword,
     confirmPassword, setConfirmPassword, isPasswordLoading, passwordMessage,
-    handleChangePassword, hasProfileChanges
+    handleChangePassword, hasProfileChanges, handleDeleteAccount, isDeleting
   };
 }
