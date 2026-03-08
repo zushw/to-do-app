@@ -109,10 +109,11 @@ class TaskViewSet(viewsets.ModelViewSet):
         task = self.get_object()
         
         if task.owner != request.user:
-            return Response(
-                {"detail": "Only the owner can change the task status."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            if not task.shared_with.filter(id=request.user.id).exists():
+                return Response(
+                    {"detail": "Only the owner can change the task status."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
             
         if 'is_completed' not in request.data:
             return Response(
