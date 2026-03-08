@@ -1,0 +1,80 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: todo_db
+          POSTGRES_USER: todo_user
+          POSTGRES_PASSWORD: todo_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run Backend Unit Tests
+        env:
+          DATABASE_URL: postgres://todo_user:todo_password@localhost:5432/todo_db
+          SECRET_KEY: "test-secret-key"
+        run: |
+          cd backend
+          pytest
+
+      - name: Start Django Server (Background)
+        env:
+          DATABASE_URL: postgres://todo_user:todo_password@localhost:5432/todo_db
+          DEBUG: "True"
+        run: |
+          cd backend
+          python manage.py migrate
+          python manage.py runserver & 
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24'
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Start Frontend Server (Background)
+        run: |
+          cd frontend
+          npm run dev & 
+        
+      - name: Wait for Servers
+        run: sleep 10 
+
+      - name: Run Selenium E2E Tests
+        run: |
+          cd frontend
+          npm test -- --runInBand
