@@ -66,6 +66,47 @@ VITE_API_URL=http://localhost:8000/api/v1
 npm run dev
 ```
 
+## Testes Automatizados E2E (Selenium)
+
+A aplicação possui uma suíte completa de testes End-to-End (E2E) escritos em JavaScript utilizando o `Selenium WebDriver` e `Jest`. Esses testes simulam o comportamento de um usuário real navegando na interface, interagindo com o DOM e validando as regras de negócio.
+
+### Pré-requisitos para execução:
+
+Para que os testes funcionem corretamente, o seu ambiente local precisa estar ativo. Certifique-se de que:
+
+1. O **Google Chrome** está instalado na máquina (o WebDriver utilizado nos testes é o ChromeDriver).
+2. O servidor **Backend (Django)** está rodando (geralmente em `http://127.0.0.1:8000`).
+3. O servidor **Frontend (Vite/React)** está rodando na porta padrão **5173** (`http://localhost:5173`).
+4. As dependências do frontend estão instaladas (`npm install`).
+
+**Estrutura de Testes (`frontend/tests`/):**
+
+- `auth.test.js`: Validação de bloqueio de credenciais inválidas, registro de novo usuário e login.
+- `categories.test.js`: Validação do fluxo de Categorias (Criação, Edição e Exclusão via modal).
+- `profile.test.js`: Validação de alteração de dados cadastrais, atualização de senha e exclusão da conta (Danger Zone).
+- `search.test.js`: Validação da funcionalidade de busca por texto e aplicação do filtro de categorias no Dashboard.
+- `tasks.test.js`: Validação do ciclo completo de uma Tarefa (Criação com descrição e categoria, Edição, Alteração de status e Compartilhamento).
+
+**Nota de Arquitetura**: Os testes são autossuficientes. Eles geram dados dinâmicos (com timestamps) para evitar conflitos, executam as validações e, ao final de cada suíte, **apagam os dados criados**, mantendo o banco de dados limpo após a execução.
+
+**Comando para executar os testes:**
+
+Abra um novo terminal na pasta do frontend e utilize os comandos abaixo:
+
+**Para rodar a suíte completa (todos os arquivos em sequência):**
+
+```bash
+npm test -- --runInBand
+```
+
+*(A flag --runInBand garante que o Jest execute um arquivo por vez, evitando que múltiplas instâncias do Chrome abram simultaneamente e sobrecarreguem a memória).*
+
+**Para rodar um arquivo de teste específico:**
+
+```bash
+npm test -- tests/nome-do-arquivo.test.js
+```
+
 ## Estrutura de Pastas
 
 ```Plaintext
