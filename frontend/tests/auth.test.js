@@ -1,4 +1,5 @@
-const { Builder, By, until } = require('selenium-webdriver');
+const { By, until } = require('selenium-webdriver');
+const { createDriver } = require('./config');
 
 describe('Authentication & Profile Flow', () => {
   let driver;
@@ -8,7 +9,7 @@ describe('Authentication & Profile Flow', () => {
   const strongPassword = 'SenhaForte@123';
 
   beforeAll(async () => {
-    driver = await new Builder().forBrowser('chrome').build();
+    driver = await createDriver();
     await driver.manage().window().maximize();
   });
 

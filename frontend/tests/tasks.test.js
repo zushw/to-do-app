@@ -1,4 +1,5 @@
-const { Builder, By, until } = require('selenium-webdriver');
+const {By, until } = require('selenium-webdriver');
+const { createDriver } = require('./config');
 
 describe('Full Task Flow with Description and Category', () => {
   let driver;
@@ -6,7 +7,7 @@ describe('Full Task Flow with Description and Category', () => {
   const editedTaskName = `${uniqueTaskName} Edited`;
 
   beforeAll(async () => {
-    driver = await new Builder().forBrowser('chrome').build();
+    driver = await createDriver();
     await driver.manage().window().maximize();
   });
 

@@ -1,4 +1,5 @@
-const { Builder, By, until } = require('selenium-webdriver');
+const { By, until } = require('selenium-webdriver');
+const { createDriver } = require('./config');
 
 describe('Category Lifecycle Flow', () => {
   let driver;
@@ -6,7 +7,7 @@ describe('Category Lifecycle Flow', () => {
   const editedCategoryName = `${uniqueCategoryName}_Edited`;
 
   beforeAll(async () => {
-    driver = await new Builder().forBrowser('chrome').build();
+    driver = await createDriver();
     await driver.manage().window().maximize();
   });
 

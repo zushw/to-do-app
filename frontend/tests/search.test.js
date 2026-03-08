@@ -1,11 +1,12 @@
-const { Builder, By, until } = require('selenium-webdriver');
+const { By, until } = require('selenium-webdriver');
+const { createDriver } = require('./config');
 
 describe('Dashboard Search & Filter Flow', () => {
   let driver;
   const searchTaskName = `FindMe_Task_${Date.now()}`;
 
   beforeAll(async () => {
-    driver = await new Builder().forBrowser('chrome').build();
+    driver = await createDriver();
     await driver.manage().window().maximize();
   });
 
