@@ -54,6 +54,9 @@ class ChangePasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
     
+    def validate_new_password(self, value):
+        return validate_strong_password(value)
+    
     
 class UserPublicSerializer(serializers.ModelSerializer):
     class Meta:
