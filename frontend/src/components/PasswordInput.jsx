@@ -5,6 +5,7 @@ export function PasswordInput({
   label = "Password", 
   value, 
   onChange, 
+  dataTestId,
   required = true, 
   showTooltip = false 
 }) {
@@ -35,6 +36,7 @@ export function PasswordInput({
           id={id}
           type={showPassword ? "text" : "password"}
           required={required}
+          data-testid={`${dataTestId}-password-input`} 
           className="w-full rounded-md border border-gray-300 py-2 pl-3 pr-10 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
           value={value}
           onChange={onChange}
@@ -42,6 +44,7 @@ export function PasswordInput({
         
         <button
           type="button"
+          data-testid={`${dataTestId}-password-button`}
           className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
           onClick={() => setShowPassword(!showPassword)}
           tabIndex="-1"

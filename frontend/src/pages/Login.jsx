@@ -14,13 +14,15 @@ export function Login() {
       footerText="Don't have an account?"
       footerLinkText="Sign up here"
       footerLinkTo="/register"
+      dataTestId="login"
     >
       <form onSubmit={handleLogin} className="space-y-6">
-        <FormInput id="username" label="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
-        <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <FormInput id="username" dataTestId="login-username" label="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <PasswordInput id="password" value={password} dataTestId="login" onChange={(e) => setPassword(e.target.value)} />
         
         <button
           type="submit"
+          data-testid="login-submit-button"
           disabled={isLoading}
           className="w-full rounded-md bg-blue-600 py-2 text-white font-semibold transition-colors hover:bg-blue-700 disabled:bg-blue-400"
         >

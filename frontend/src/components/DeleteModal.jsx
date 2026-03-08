@@ -11,6 +11,7 @@ export function DeleteModal({ isOpen, onClose, onConfirm, itemName, isDeleting }
         
         <div className="mt-6 flex justify-end space-x-3">
           <button
+            data-testid="delete-modal-cancel-button"
             onClick={onClose}
             disabled={isDeleting}
             className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50"
@@ -18,6 +19,7 @@ export function DeleteModal({ isOpen, onClose, onConfirm, itemName, isDeleting }
             Cancel
           </button>
           <button
+            data-testid="delete-modal-confirm-button"
             onClick={onConfirm}
             disabled={isDeleting}
             className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:bg-red-400"

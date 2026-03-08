@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export function AuthLayout({ title, subtitle, error, children, footerText, footerLinkText, footerLinkTo }) {
+export function AuthLayout({ title, subtitle, error, children, footerText, footerLinkText, footerLinkTo, dataTestId }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
@@ -20,7 +20,7 @@ export function AuthLayout({ title, subtitle, error, children, footerText, foote
 
         <div className="mt-6 text-center text-sm text-gray-600">
           {footerText}{' '}
-          <Link to={footerLinkTo} className="font-semibold text-blue-600 hover:text-blue-500">
+          <Link data-testid={`${dataTestId}-redirect-link`} to={footerLinkTo} className="font-semibold text-blue-600 hover:text-blue-500">
             {footerLinkText}
           </Link>
         </div>

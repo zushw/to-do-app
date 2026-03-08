@@ -38,7 +38,7 @@ export function TaskModal({ isOpen, onClose, onSave, taskToEdit, categories, isS
           <h3 className="text-lg font-bold text-gray-900">
             {isEditing ? 'Edit Task' : 'Create New Task'}
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button data-testid="close-task-modal" onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -48,16 +48,17 @@ export function TaskModal({ isOpen, onClose, onSave, taskToEdit, categories, isS
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Title</label>
-            <input type="text" required autoFocus className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <input data-testid="task-title-input" type="text" required autoFocus className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Description (Optional)</label>
-            <textarea rows="3" className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <textarea data-testid="task-description-input" rows="3" className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500" value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Category</label>
             <select
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+              data-testid="task-category-select"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               disabled={!isOwner}
@@ -80,8 +81,8 @@ export function TaskModal({ isOpen, onClose, onSave, taskToEdit, categories, isS
             )}
           </div>
           <div className="mt-6 flex justify-end space-x-3">
-            <button type="button" onClick={onClose} className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Cancel</button>
-            <button type="submit" disabled={isSaving || !title.trim()} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-blue-400">
+            <button type="button" data-testid="cancel-task-button" onClick={onClose} className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Cancel</button>
+            <button type="submit" data-testid="save-task-button" disabled={isSaving || !title.trim()} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-blue-400">
               {isSaving ? 'Saving...' : (isEditing ? 'Save Changes' : 'Save Task')}
             </button>
           </div>

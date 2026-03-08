@@ -14,14 +14,16 @@ export function Register() {
       footerText="Already have an account?"
       footerLinkText="Sign in here"
       footerLinkTo="/login"
+      dataTestId="register"
     >
       <form onSubmit={handleRegister} className="space-y-6">
-        <FormInput id="username" label="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
-        <FormInput id="email" label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} showTooltip={true} />
+        <FormInput id="username" dataTestId="register-username" label="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <FormInput id="email" dataTestId="register-email" label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <PasswordInput id="password" value={password} dataTestId="register" onChange={(e) => setPassword(e.target.value)} showTooltip={true} />
         
         <button
           type="submit"
+          data-testid="register-submit-button"
           disabled={isLoading}
           className="w-full rounded-md bg-green-600 py-2 font-semibold text-white transition-colors hover:bg-green-700 disabled:bg-green-400"
         >

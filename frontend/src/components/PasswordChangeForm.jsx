@@ -17,6 +17,7 @@ export function PasswordChangeForm({
           <label className="block text-sm font-medium text-gray-700">Current Password</label>
           <input
             type="password" required
+            data-testid="password-change-current-input"
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)}
           />
@@ -25,6 +26,7 @@ export function PasswordChangeForm({
           <label className="block text-sm font-medium text-gray-700">New Password</label>
           <input
             type="password" required
+            data-testid="password-change-new-input"
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
           />
@@ -33,6 +35,7 @@ export function PasswordChangeForm({
           <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
           <input
             type="password" required
+            data-testid="password-change-confirm-input"
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
           />
@@ -40,6 +43,7 @@ export function PasswordChangeForm({
         <div className="flex justify-end">
           <button
             type="submit"
+            data-testid="password-change-update-button"
             disabled={isLoading || !currentPassword || !newPassword || !confirmPassword || currentPassword == newPassword}
             className="rounded-md bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >

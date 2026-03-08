@@ -16,6 +16,7 @@ export function ProfileInfoForm({
           <label className="block text-sm font-medium text-gray-700">Username</label>
           <input
             type="text" required
+            data-testid="profile-username-input"
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             value={username} onChange={(e) => setUsername(e.target.value)}
           />
@@ -24,6 +25,7 @@ export function ProfileInfoForm({
           <label className="block text-sm font-medium text-gray-700">Email Address</label>
           <input
             type="email" required
+            data-testid="profile-email-input"
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             value={email} onChange={(e) => setEmail(e.target.value)}
           />
@@ -31,6 +33,7 @@ export function ProfileInfoForm({
         <div className="flex justify-end">
           <button
             type="submit" disabled={isLoading || !hasProfileChanges}
+            data-testid="profile-save-button"
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
           >
             {isLoading ? 'Saving...' : 'Save Profile'}
