@@ -22,7 +22,7 @@ export function Dashboard() {
     isDeleteModalOpen, setIsDeleteModalOpen, taskToDelete, setTaskToDelete,
     isCategoryModalOpen, setIsCategoryModalOpen,
     handleSaveTask, handleToggleComplete, handleDeleteTask,
-    handleCreateCategory, handleUpdateCategory, handleDeleteCategory, getCategoryName,
+    handleCreateCategory, handleUpdateCategory, handleDeleteCategory,
     isShareModalOpen, setIsShareModalOpen, taskToShare, setTaskToShare,
     handleShareTask, handleUnshareTask, usersList
   } = useDashboard();
@@ -74,7 +74,7 @@ export function Dashboard() {
                   <div className="p-8 text-center text-gray-500 italic">No pending tasks. You're all caught up!</div>
                 ) : (
                   pendingTasks.map((task) => (
-                    <TaskItem key={task.id} task={task} currentUser={user} categoryName={getCategoryName(task.category)} onToggleComplete={handleToggleComplete} onEdit={() => { setTaskToEdit(task); setIsTaskModalOpen(true); }} onDelete={() => { setTaskToDelete(task); setIsDeleteModalOpen(true); }} onShareClick={() => { setTaskToShare(task); setIsShareModalOpen(true); }} />
+                    <TaskItem key={task.id} task={task} currentUser={user} categoryName={task.category_name} onToggleComplete={handleToggleComplete} onEdit={() => { setTaskToEdit(task); setIsTaskModalOpen(true); }} onDelete={() => { setTaskToDelete(task); setIsDeleteModalOpen(true); }} onShareClick={() => { setTaskToShare(task); setIsShareModalOpen(true); }} />
                   ))
                 )}
               </ul>
@@ -92,7 +92,7 @@ export function Dashboard() {
                   <div className="p-8 text-center text-gray-500 italic">No tasks completed yet. Let's get to work!</div>
                 ) : (
                   completedTasks.map((task) => (
-                    <TaskItem key={task.id} task={task} currentUser={user} categoryName={getCategoryName(task.category)} onToggleComplete={handleToggleComplete} onEdit={() => { setTaskToEdit(task); setIsTaskModalOpen(true); }} onDelete={() => { setTaskToDelete(task); setIsDeleteModalOpen(true); }} onShareClick={() => { setTaskToShare(task); setIsShareModalOpen(true); }} />
+                    <TaskItem key={task.id} task={task} currentUser={user} categoryName={task.category_name} onToggleComplete={handleToggleComplete} onEdit={() => { setTaskToEdit(task); setIsTaskModalOpen(true); }} onDelete={() => { setTaskToDelete(task); setIsDeleteModalOpen(true); }} onShareClick={() => { setTaskToShare(task); setIsShareModalOpen(true); }} />
                   ))
                 )}
               </ul>
@@ -107,7 +107,7 @@ export function Dashboard() {
       <TaskModal 
         isOpen={isTaskModalOpen} 
         onClose={() => { setIsTaskModalOpen(false); setTaskToEdit(null); }} 
-        onSave={handleSaveTask} taskToEdit={taskToEdit} categories={categories} isSaving={isProcessing} 
+        onSave={handleSaveTask} taskToEdit={taskToEdit} categories={categories} isSaving={isProcessing} currentUser={user} 
       />
 
       <DeleteModal 

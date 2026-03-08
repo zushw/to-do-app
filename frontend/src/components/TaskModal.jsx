@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 
-export function TaskModal({ isOpen, onClose, onSave, taskToEdit, categories, isSaving }) {
+export function TaskModal({ isOpen, onClose, onSave, taskToEdit, categories, isSaving, currentUser }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
+  const isOwner = !taskToEdit || taskToEdit.owner_username === currentUser?.username;
 
   useEffect(() => {
     if (taskToEdit) {
@@ -54,13 +55,29 @@ export function TaskModal({ isOpen, onClose, onSave, taskToEdit, categories, isS
             <textarea rows="3" className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500" value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Category (Optional)</label>
-            <select className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 outline-none focus:border-blue-500" value={category} onChange={(e) => setCategory(e.target.value)}>
-              <option value="">No Category</option>
+            <label className="block text-sm font-medium text-gray-700">Category</label>
+            <select
+              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              disabled={!isOwner}
+            >
+              <option value="">No category</option>
               {categories.map(cat => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
+
+              {!isOwner && taskToEdit?.category_name && (
+                <option value={taskToEdit.category} className="italic text-gray-500">
+                  {taskToEdit.category_name} (Owner's Category)
+                </option>
+              )}
             </select>
+            {!isOwner && (
+              <p className="mt-1 text-xs text-orange-600">
+                Only the owner ({taskToEdit.owner_username}) can change the category.
+              </p>
+            )}
           </div>
           <div className="mt-6 flex justify-end space-x-3">
             <button type="button" onClick={onClose} className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Cancel</button>
