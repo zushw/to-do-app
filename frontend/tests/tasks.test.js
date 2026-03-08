@@ -14,6 +14,12 @@ describe('Full Task Flow with Description and Category', () => {
 
   it('1. Should create an account and login', async () => {
     await driver.get('http://localhost:5173/register'); 
+    await driver.findElement(By.css('[data-testid="register-username-input"]')).sendKeys("user-share");
+    await driver.findElement(By.css('[data-testid="register-email-input"]')).sendKeys("user-share@teste.com");
+    await driver.findElement(By.css('[data-testid="register-password-input"]')).sendKeys("s3nh@Forte");
+    await driver.findElement(By.css('[data-testid="register-submit-button"]')).click();
+
+    await driver.get('http://localhost:5173/register'); 
     await driver.findElement(By.css('[data-testid="register-username-input"]')).sendKeys("teste-t");
     await driver.findElement(By.css('[data-testid="register-email-input"]')).sendKeys("teste-t@teste.com");
     await driver.findElement(By.css('[data-testid="register-password-input"]')).sendKeys("s3nh@Forte");
@@ -150,9 +156,9 @@ describe('Full Task Flow with Description and Category', () => {
     await driver.findElement(By.css('[data-testid="category-modal-close-button"]')).click();
   });
 
-  it('7. Should DELETE the account to clean up', async () => {
+  it('7. Should DELETE the accounts to clean up', async () => {
     await driver.get('http://localhost:5173/profile'); 
-    const deleteBtn = await driver.wait(
+    let deleteBtn = await driver.wait(
       until.elementLocated(By.css('[data-testid="profile-delete-account-button"]')), 
       5000
     );
@@ -163,7 +169,31 @@ describe('Full Task Flow with Description and Category', () => {
     await deleteBtn.click();
 
     await driver.wait(until.alertIsPresent(), 5000);
-    const alert = await driver.switchTo().alert();
+    let alert = await driver.switchTo().alert();
+    await alert.accept(); 
+
+    await driver.wait(until.urlContains('/login'), 10000);
+
+    const userInput = await driver.wait(until.elementLocated(By.css('[data-testid="login-username-input"]')), 5000);
+    await userInput.sendKeys("user-share");
+    await driver.findElement(By.css('[data-testid="login-password-input"]')).sendKeys("s3nh@Forte");
+    await driver.findElement(By.css('[data-testid="login-submit-button"]')).click();
+
+    await driver.sleep(500); 
+
+    await driver.get('http://localhost:5173/profile'); 
+    deleteBtn = await driver.wait(
+      until.elementLocated(By.css('[data-testid="profile-delete-account-button"]')), 
+      5000
+    );
+    
+    await driver.executeScript("arguments[0].scrollIntoView(true);", deleteBtn);
+    await driver.sleep(500); 
+    
+    await deleteBtn.click();
+
+    await driver.wait(until.alertIsPresent(), 5000);
+    alert = await driver.switchTo().alert();
     await alert.accept(); 
 
     await driver.wait(until.urlContains('/login'), 10000);
