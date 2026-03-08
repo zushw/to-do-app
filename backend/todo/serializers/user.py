@@ -45,24 +45,16 @@ class UserSerializer(serializers.ModelSerializer):
         return user
     
 class UserUpdateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(
-        write_only=True, 
-        required=False, 
-        style={'input_type': 'password'}
-    )
-    
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password']
+        fields = ['id', 'username', 'email']
+        read_only_fields = ['id']
 
-    def validate_password(self, value):
-        return validate_strong_password(value)
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
     
-    def update(self, instance, validated_data):
-        if 'password' in validated_data:
-            instance.set_password(validated_data.pop('password'))
-        
-        return super().update(instance, validated_data)
+    
 class UserPublicSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

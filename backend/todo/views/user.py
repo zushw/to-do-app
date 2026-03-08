@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
-from ..serializers.user import UserPublicSerializer, UserUpdateSerializer
+from ..serializers.user import UserPublicSerializer, UserUpdateSerializer, ChangePasswordSerializer
 from drf_spectacular.utils import extend_schema
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -30,3 +30,22 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'], url_path='change-password')
+    def change_password(self, request):
+        user = request.user
+        serializer = ChangePasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            if not user.check_password(serializer.validated_data.get('current_password')):
+                return Response(
+                    {"current_password": ["Wrong password."]}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            user.set_password(serializer.validated_data.get('new_password'))
+            user.save()
+            
+            return Response({"detail": "Password updated successfully!"}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
