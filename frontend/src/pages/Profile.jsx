@@ -14,7 +14,7 @@ export function Profile() {
     isProfileLoading, profileMessage, handleUpdateProfile,
     currentPassword, setCurrentPassword, newPassword, setNewPassword,
     confirmPassword, setConfirmPassword, isPasswordLoading, passwordMessage,
-    handleChangePassword, handleDeleteAccount, isDeleting
+    handleChangePassword, hasProfileChanges, handleDeleteAccount, isDeleting
   } = useProfile();
 
   return (
@@ -29,7 +29,7 @@ export function Profile() {
             username={username} setUsername={setUsername}
             email={email} setEmail={setEmail}
             isLoading={isProfileLoading} message={profileMessage}
-            onSubmit={handleUpdateProfile}
+            onSubmit={handleUpdateProfile} hasProfileChanges={hasProfileChanges}
           />
 
           <PasswordChangeForm 
