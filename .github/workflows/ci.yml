@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
@@ -41,23 +41,33 @@ jobs:
 
       - name: Run Backend Unit Tests
         env:
-          DATABASE_URL: postgres://todo_user:todo_password@localhost:5432/todo_db
+          DB_ENGINE: postgres
+          DB_NAME: todo_db
+          DB_USER: todo_user
+          DB_PASSWORD: todo_password
+          DB_HOST: localhost
+          DB_PORT: 5432
           SECRET_KEY: "test-secret-key"
         run: |
           cd backend
-          pytest
+          pytest 
 
       - name: Start Django Server (Background)
         env:
-          DATABASE_URL: postgres://todo_user:todo_password@localhost:5432/todo_db
-          DEBUG: "True"
+          DB_ENGINE: postgres
+          DB_NAME: todo_db
+          DB_USER: todo_user
+          DB_PASSWORD: todo_password
+          DB_HOST: localhost
+          DB_PORT: 5432
+          ALLOWED_HOSTS: "*"
         run: |
           cd backend
           python manage.py migrate
-          python manage.py runserver & 
-
+          python manage.py runserver &
+          
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '24'
 
@@ -67,14 +77,20 @@ jobs:
           npm install
 
       - name: Start Frontend Server (Background)
+        env:
+          VITE_API_URL: http://localhost:8000/api/v1
         run: |
           cd frontend
           npm run dev & 
-        
-      - name: Wait for Servers
-        run: sleep 10 
+
+      - name: Wait for services to be ready
+        run: |
+          npx wait-on http://localhost:8000/api/v1/ --timeout 30000
+          npx wait-on http://localhost:5173 --timeout 30000
 
       - name: Run Selenium E2E Tests
+        env:
+          VITE_API_URL: http://localhost:8000/api/v1
         run: |
           cd frontend
           npm test -- --runInBand
